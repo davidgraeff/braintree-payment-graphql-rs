@@ -1,0 +1,51 @@
+mutation customerClientToken($custID: ID!) {
+    createClientToken(input:{clientToken:{customerId:$custID}}) {
+        clientToken
+    }
+}
+
+mutation createCustomer($customer: CustomerInput!) {
+    createCustomer(input:{customer:$customer}) {
+        customer {
+            email,
+            id,
+            firstName,
+            lastName,
+            company
+        }
+    }
+}
+
+mutation updateCustomer($custID: ID!, $customer: CustomerInput!) {
+    updateCustomer(input:{customerId:$custID,customer:$customer}) {
+        customer {
+            email,
+            id,
+            firstName,
+            lastName,
+            company
+        }
+    }
+}
+
+mutation deleteCustomer($custID: ID!, $clientMutationId: String) {
+    deleteCustomer(input:{customerId:$custID, clientMutationId: $clientMutationId}) {
+        clientMutationId
+    }
+}
+
+query getCustomer($custID: ID!) {
+    node(id:$custID) {
+        __typename
+        ... on Customer {
+            id,email,firstName,lastName,company,createdAt,
+            paymentMethods(first:0){edges{cursor,node{id,usage,details {
+                __typename
+                ... on PayPalAccountDetails {
+                    email,firstName,lastName
+                }
+            }}}}
+        }
+    }
+}
+

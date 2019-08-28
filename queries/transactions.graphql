@@ -1,0 +1,125 @@
+mutation chargePaymentMethod($paymentMethodId: ID!, $transaction:TransactionInput!, $clientMutationId: String) {
+    chargePaymentMethod(input: {
+        paymentMethodId:$paymentMethodId, transaction:$transaction, clientMutationId:$clientMutationId
+    }) {
+        transaction {
+            id,
+            createdAt,
+            amount {
+                value,
+                currencyIsoCode
+            },
+            orderId,
+            customer {
+                id
+            },
+            status
+        }
+    }
+}
+
+mutation vaultPayment($vault_payment_input: VaultPaymentMethodInput!) {
+    vaultPaymentMethod(input: $vault_payment_input) {
+        paymentMethod {
+            id
+            usage
+            customer {
+                id
+            }
+            details {
+                __typename
+                ... on CreditCardDetails {
+                    cardholderName
+                }
+                ... on PayPalAccountDetails {
+                    email
+                }
+                ... on VenmoAccountDetails {
+                    username
+                }
+                ... on UsBankAccountDetails {
+                    accountholderName
+                }
+            }
+        }
+        verification {
+            status
+        }
+    }
+}
+
+mutation deleteVaultedPayment($input: DeletePaymentMethodFromVaultInput!) {
+    deletePaymentMethodFromVault(input:$input) {
+        clientMutationId
+    }
+}
+
+mutation verifyPaymentMethod($input: VerifyPaymentMethodInput!) {
+    verifyPaymentMethod(input:$input) {
+        verification {
+            id,
+            amount{value},
+            status,
+            riskData{decision},
+            processorResponse{message,cvvResponse,avsPostalCodeResponse,avsStreetAddressResponse}
+        }
+    }
+}
+
+query searchTransaction($input: TransactionSearchInput!) {
+    search {
+        transactions(input:$input) {
+            edges {
+                node {
+                    id,amount{value,currencyIsoCode},customer {email,id},
+                    paymentMethod{
+                        details {
+                            __typename
+                            ... on CreditCardDetails {
+                                cardholderName
+                            }
+                            ... on PayPalAccountDetails {
+                                email
+                            }
+                            ... on VenmoAccountDetails {
+                                username
+                            }
+                            ... on UsBankAccountDetails {
+                                accountholderName
+                            }
+                        }
+                    },orderId,status,createdAt
+                }
+            }
+        }
+    }
+}
+
+query getTransaction($transactionID: String!) {
+    search {
+        transactions(input:{id: {is: $transactionID}}) {
+            edges {
+                node {
+                    id,amount{value,currencyIsoCode},customer {email,id},
+                    paymentMethod{
+                        details {
+                            __typename
+                            ... on CreditCardDetails {
+                                cardholderName
+                            }
+                            ... on PayPalAccountDetails {
+                                email
+                            }
+                            ... on VenmoAccountDetails {
+                                username
+                            }
+                            ... on UsBankAccountDetails {
+                                accountholderName
+                            }
+                        }
+                    },orderId,status,createdAt
+                }
+            }
+        }
+    }
+}
