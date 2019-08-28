@@ -1,5 +1,6 @@
 #[macro_use(unwrap_query)]
 extern crate braintreepayment_graphql;
+
 use braintreepayment_graphql::{Braintree, mutation_id, Credentials};
 use failure::*;
 use graphql_client::GraphQLQuery;
@@ -57,14 +58,16 @@ fn update_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Err
 }
 
 fn query_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Error> {
-    use braintreepayment_graphql::queries::customer::get_customer::*;
+    use braintreepayment_graphql::queries::{customer::get_customer::*, customer_helpers::unwrap_customer};
 
-    let customer = unwrap_query!(bt
-            .perform(
-                GetCustomer {
-                    cust_id: customer_id.to_owned(),
-                },
-            )? => GetCustomerNodeOn::Customer)?;
+    let customer = bt
+        .perform(
+            GetCustomer {
+                cust_id: customer_id.to_owned(),
+            },
+        )?;
+
+    let customer = unwrap_customer(customer).ok_or(err_msg("No customer found with the given ID"))?;
 
     assert_eq!(customer.first_name, Some("new".to_owned()));
     assert_eq!(customer.last_name, Some("name".to_owned()));
@@ -81,7 +84,7 @@ fn client_token(bt: &Braintree, customer_id: &str) -> Result<(), failure::Error>
         })?
         .create_client_token
         .and_then(|f| f.client_token)
-        .ok_or(err_msg("Token"))?;
+        .ok_or(err_msg("No token found in the response"))?;
 
     println!("{}", client_token);
     Ok(())

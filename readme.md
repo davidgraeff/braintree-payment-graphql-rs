@@ -149,21 +149,20 @@ fn update_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Err
 While mutations (create, update, delete) have a reasonable response layout, that cannot be said
 about queries, like the next one to retrieve a customer by ID.
 
-Braintree implements a pageable API that works the same for all types of retrieval queries
-including those 1-result simple queries. This results in a quite nested response layout, which
-is handled by the `unwrap_query` macro. Wrap the `bt.perform(...)?` call followed by an arrow
-and the target type, in this case `GetCustomerNodeOn::Customer`.
+Braintree implements a pageable API which results in some deeply nested response structures.
+Use `unwrap_customer` to extract the customer object.
 
 ```rust
 fn get_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Error> {
-    use braintreepayment_graphql::queries::customer::get_customer::*;
+    use braintreepayment_graphql::queries::{customer::get_customer::*, customer_helpers::unwrap_customer};
 
-    let customer = unwrap_query!(bt
+    let customer = bt
         .perform(
             GetCustomer {
                 cust_id: customer_id.to_owned(),
             },
-        )? => GetCustomerNodeOn::Customer)?;
+        )?;
+    let customer = unwrap_customer(customer).ok_or(err_msg("No customer found with the given ID"))?;
 
     assert_eq!(customer.first_name, Some("new".to_owned()));
     assert_eq!(customer.last_name, Some("name".to_owned()));
@@ -184,7 +183,7 @@ fn customer_client_token(bt: &Braintree, customer_id:&str) -> Result<(), failure
         })?
         .create_client_token
         .and_then(|f| f.client_token)
-        .ok_or(err_msg("Token"))?;
+        .ok_or(err_msg("No token found in the response"))?;
 
     println!("{}", client_token);
     Ok(())
@@ -233,45 +232,117 @@ Find transaction related queries in this section.
 #### Charge single-use payment method
 
 ```rust
+fn payment(
+    bt: &Braintree,
+    payment_method_id: &str,
+    amount: rust_decimal::Decimal,
+    order_id:Option<String>
+) -> Result<ChargePaymentMethodChargePaymentMethodTransaction, failure::Error> {
+    use braintreepayment_graphql::queries::transactions::charge_payment_method::*;
 
+    let response = bt.perform(ChargePaymentMethod {
+        payment_method_id: payment_method_id.to_owned(),
+        transaction: TransactionInput {
+            order_id,
+            purchase_order_number: Some("demo_id".to_owned()),
+            ..TransactionInput::new(amount)
+        },
+        client_mutation_id: None,
+    })?.charge_payment_method
+       .and_then(|f| f.transaction)
+       .ok_or(err_msg("Expected a payment result"))?;
+
+   Ok(response)
+}
 ```
 
 #### Vault payment
 
-```rust
-
-```
-
-#### Charge vaulted payment method
+A vaulted payment response contains a new payment method ID which can be used the same like a single-use payment method ID.
 
 ```rust
+fn vault(
+    bt: &Braintree,
+    payment_method_id: &str,
+) -> Result<VaultPaymentVaultPaymentMethodPaymentMethod, failure::Error> {
+    use braintreepayment_graphql::queries::transactions::vault_payment::*;
 
-```
-
-#### Charge vaulted payment method
-
-```rust
-
+    let r = bt
+        .perform(VaultPayment {
+            vault_payment_input: VaultPaymentMethodInput {
+                ..VaultPaymentMethodInput::new(payment_method_id.to_owned())
+            },
+        })?
+        .vault_payment_method
+        .and_then(|f| f.payment_method)
+        .ok_or(err_msg("Expected a vault result"))?;
+    Ok(r)
+}
 ```
 
 #### Remove vaulted payment method
 
 ```rust
+fn delete_transaction(bt: &Braintree, payment_method_id: &str) -> Result<(), failure::Error> {
+    use braintreepayment_graphql::queries::transactions::delete_vaulted_payment::*;
 
+    let _ = bt.perform(DeleteVaultedPayment {
+        input: DeletePaymentMethodFromVaultInput {
+            ..DeletePaymentMethodFromVaultInput::new(payment_method_id.to_owned())
+        },
+    })?;
+
+    Ok(())
+}
 ```
 
-#### List vaulted payment methods of a customer
+
+#### Search for a transaction
 
 ```rust
+use braintreepayment_graphql::queries::transaction_helper::unwrap_search_result;
 
+pub fn search_transaction(
+    bt: &Braintree,
+    order_id: &str,
+) -> Result<Vec<SearchTransactionSearchTransactionsEdgesNode>, failure::Error> {
+    use crate::queries::transactions::search_transaction::*;
+
+    let r = bt
+        .perform(SearchTransaction {
+            input: TransactionSearchInput {
+                order_id: Some(SearchTextInput {
+                    is: Some(order_id.to_owned()),
+                    ..SearchTextInput::new()
+                }),
+                ..TransactionSearchInput::new()
+            },
+        })?;
+
+    unwrap_search_result(r)
+}
 ```
 
-#### List transactions of a customer
+
+#### Get transaction by ID
 
 ```rust
+use braintreepayment_graphql::queries::transaction_helper::unwrap_get_result;
 
+pub fn get_transaction(
+    bt: &Braintree,
+    transaction_id: &str,
+) -> Result<Option<GetTransactionSearchTransactionsEdgesNode>, failure::Error> {
+    use crate::queries::transactions::get_transaction::*;
+
+    let r = bt
+        .perform(GetTransaction {
+            transaction_id: transaction_id.to_owned(),
+        })?;
+
+    Ok(unwrap_get_result(r)?)
+}
 ```
-
 
 ### Error Handling
 

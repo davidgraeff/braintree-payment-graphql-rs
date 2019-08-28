@@ -46,6 +46,7 @@ impl Environment {
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub struct Credentials {
     environment: Environment,
+    #[allow(dead_code)]
     merchant_id: String,
     public_key: String,
     private_key: String,
