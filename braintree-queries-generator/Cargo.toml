@@ -1,0 +1,26 @@
+[package]
+name = "braintree-queries-generator"
+version = "0.1.0"
+authors = ["David Gräff <david.graeff@web.de>"]
+edition = "2018"
+license = "MIT"
+description = "This crate allows easy access to the [Braintree](https://www.braintreepayments.com) API via the GraphQL interface."
+
+[dependencies]
+braintreepayment_graphql = { path = "../" }
+graphql_client_codegen = { git = "https://github.com/davidgraeff/graphql-client", branch = "master" }
+graphql_client = { git = "https://github.com/davidgraeff/graphql-client", branch = "master" }
+failure = "0.1.5"
+syn = { version = "^1.0", features = ["extra-traits"] }
+
+rustfmt-nightly = { version = "1.4.5", optional = true }
+serde_json = "^1.0"
+serde = "^1.0"
+rust_decimal = "1.0.3"
+quote = "1.0.2"
+tempfile = "3.1.0"
+rand = "0.7.0"
+
+[features]
+default = ["rustfmt"]
+rustfmt = ["rustfmt-nightly"]

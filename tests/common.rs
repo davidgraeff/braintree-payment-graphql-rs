@@ -1,6 +1,5 @@
 use braintreepayment_graphql::{Braintree, Credentials};
 use failure::*;
-use graphql_client::GraphQLQuery;
 
 doc_comment::doctest!("../readme.md");
 

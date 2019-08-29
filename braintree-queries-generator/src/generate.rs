@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use syn::Token;
 
 #[cfg(feature = "rustfmt")]
-fn format(codes: &str, filename: &str) -> String {
+fn format(codes: String, filename: &str) -> String {
     use rustfmt_nightly::{Config, Input, Session};
 
     let mut config = Config::default();
@@ -17,22 +17,22 @@ fn format(codes: &str, filename: &str) -> String {
 
     let mut out = Vec::with_capacity(codes.len() * 2);
 
-    let r = Session::new(config, Some(&mut out)).format(Input::Text(codes.to_owned()));
+    let r = Session::new(config, Some(&mut out)).format(Input::Text(codes.clone()));
     match r {
         Err(_) => {
             format_err!("rustfmt error on {}", filename);
-            codes.to_owned()
+            codes
         }
         _ => match out.len() {
-            0 => codes.to_owned(),
+            0 => codes,
             _ => String::from_utf8(out).unwrap(),
         },
     }
 }
 
 #[cfg(not(feature = "rustfmt"))]
-fn format(codes: &str, _: &str) -> String {
-    return codes.to_owned();
+fn format(codes: String, _: &str) -> String {
+    return codes;
 }
 
 fn visit_dirs(dir: &Path, cb: &dyn Fn(&DirEntry) -> Result<(), failure::Error>) -> Result<(), failure::Error> {
@@ -78,10 +78,12 @@ pub fn generate(query_path: PathBuf, output_directory: PathBuf) -> Result<(), fa
     file.write_all(schema_data.as_bytes())?;
     file.flush()?;
 
+    let is_own_queries = std::path::Path::new("braintree-queries-generator").exists();
+
     visit_dirs(&query_path, &move |query_file: &std::fs::DirEntry| {
         let gen = generate_module_token_stream(query_file.path().clone(), file.path(), create_options())?;
 
-        let gen = match env!("CARGO_PKG_NAME") == "braintreepayment_graphql" {
+        let gen = match is_own_queries {
             true => quote!(
                 #![allow(non_camel_case_types)]
                 #[allow(unused_imports)]
@@ -96,14 +98,22 @@ pub fn generate(query_path: PathBuf, output_directory: PathBuf) -> Result<(), fa
             ),
         };
 
-        let generated_code = gen.to_string();
-        let generated_code = format(&generated_code, query_file.path().to_str().unwrap());
+        let generated_code = format(gen.to_string(), query_file.path().to_str().unwrap());
+        let generated_code = match is_own_queries {
+            true => generated_code.replace("graphql_client::GraphQLQueryCLI", "crate::GraphQLQueryCLI"),
+            false => generated_code.replace(
+                "graphql_client::GraphQLQueryCLI",
+                "braintreepayment_graphql::GraphQLQueryCLI",
+            ),
+        };
 
         let query_file_name: std::ffi::OsString = query_file.file_name().to_owned();
 
         let dest_file_path: PathBuf = output_directory.join(query_file_name).with_extension("rs");
-        println!("Generated file {}", dest_file_path.to_str().as_ref().unwrap());
-
+        match is_own_queries {
+            true => println!("Updated library file {}", dest_file_path.to_str().as_ref().unwrap()),
+            false => println!("Generated file {}", dest_file_path.to_str().as_ref().unwrap()),
+        }
         let mut file = File::create(dest_file_path)?;
         write!(file, "{}", generated_code)?;
         Ok(())

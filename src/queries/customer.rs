@@ -35,7 +35,7 @@ pub mod customer_client_token {
         #[serde(rename = "custID")]
         pub cust_id: ID,
     }
-    impl graphql_client::GraphQLQueryCLI for CustomerClientToken {
+    impl crate::GraphQLQueryCLI for CustomerClientToken {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -145,7 +145,7 @@ pub mod create_customer {
     pub struct CreateCustomer {
         pub customer: CustomerInput,
     }
-    impl graphql_client::GraphQLQueryCLI for CreateCustomer {
+    impl crate::GraphQLQueryCLI for CreateCustomer {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -257,7 +257,7 @@ pub mod update_customer {
         pub cust_id: ID,
         pub customer: CustomerInput,
     }
-    impl graphql_client::GraphQLQueryCLI for UpdateCustomer {
+    impl crate::GraphQLQueryCLI for UpdateCustomer {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -352,7 +352,7 @@ pub mod delete_customer {
         #[serde(rename = "clientMutationId")]
         pub client_mutation_id: Option<String>,
     }
-    impl graphql_client::GraphQLQueryCLI for DeleteCustomer {
+    impl crate::GraphQLQueryCLI for DeleteCustomer {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -539,8 +539,8 @@ pub mod get_customer {
     #[serde(tag = "__typename")]
     pub enum GetCustomerNodeOn {
         Customer(GetCustomerNodeOnCustomer),
-        PaymentMethod,
         Verification,
+        PaymentMethod,
         Refund,
         Transaction,
     }
@@ -561,7 +561,7 @@ pub mod get_customer {
         #[serde(rename = "custID")]
         pub cust_id: ID,
     }
-    impl graphql_client::GraphQLQueryCLI for GetCustomer {
+    impl crate::GraphQLQueryCLI for GetCustomer {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {

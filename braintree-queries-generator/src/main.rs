@@ -2,8 +2,10 @@ extern crate failure;
 #[cfg(feature = "rustfmt")]
 extern crate rustfmt_nightly;
 extern crate syn;
-use braintreepayment_graphql::generate::generate;
 use std::path::PathBuf;
+
+mod generate;
+use generate::generate;
 
 fn main() -> Result<(), failure::Error> {
     let query_path: PathBuf = "queries/".parse().expect("Query path error");

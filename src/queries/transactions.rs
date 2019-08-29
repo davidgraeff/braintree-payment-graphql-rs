@@ -478,7 +478,7 @@ pub mod charge_payment_method {
         #[serde(rename = "clientMutationId")]
         pub client_mutation_id: Option<String>,
     }
-    impl graphql_client::GraphQLQueryCLI for ChargePaymentMethod {
+    impl crate::GraphQLQueryCLI for ChargePaymentMethod {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -1093,7 +1093,7 @@ pub mod vault_payment {
     pub struct VaultPayment {
         pub vault_payment_input: VaultPaymentMethodInput,
     }
-    impl graphql_client::GraphQLQueryCLI for VaultPayment {
+    impl crate::GraphQLQueryCLI for VaultPayment {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -1648,7 +1648,7 @@ pub mod delete_vaulted_payment {
     pub struct DeleteVaultedPayment {
         pub input: DeletePaymentMethodFromVaultInput,
     }
-    impl graphql_client::GraphQLQueryCLI for DeleteVaultedPayment {
+    impl crate::GraphQLQueryCLI for DeleteVaultedPayment {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -2356,7 +2356,7 @@ pub mod verify_payment_method {
     pub struct VerifyPaymentMethod {
         pub input: VerifyPaymentMethodInput,
     }
-    impl graphql_client::GraphQLQueryCLI for VerifyPaymentMethod {
+    impl crate::GraphQLQueryCLI for VerifyPaymentMethod {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -3389,7 +3389,7 @@ pub mod search_transaction {
     pub struct SearchTransaction {
         pub input: TransactionSearchInput,
     }
-    impl graphql_client::GraphQLQueryCLI for SearchTransaction {
+    impl crate::GraphQLQueryCLI for SearchTransaction {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
@@ -4423,7 +4423,7 @@ pub mod get_transaction {
         #[serde(rename = "transactionID")]
         pub transaction_id: String,
     }
-    impl graphql_client::GraphQLQueryCLI for GetTransaction {
+    impl crate::GraphQLQueryCLI for GetTransaction {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {

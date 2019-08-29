@@ -403,12 +403,14 @@ Start test runs with `cargo test` as usual.
 
 Note that this is an unofficial library, provided as-is, with no support whatsoever by Braintree.
 
-API Stability: Nested responses might be automatically collapsed at some point with a few more feature changes to
-the underlying graphql-client. A convience API for paging might be added.
-
-This crate uses a modified branch of the graphql-client crate until 0.9 is released.
+The generator tool uses a modified branch of the graphql-client crate until 0.9 is released.
 
 MIT licensed. Pull requests are welcome.
+
+## For maintainers
+
+Update the Braintree schema file with `cd braintree-queries-generator && ./update_schema.sh`.
+Run `cargo run -p braintree-queries-generator` in this directory to update the generated query/mutation files.
 
 Cheers,
 David Graeff

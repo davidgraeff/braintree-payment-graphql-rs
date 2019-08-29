@@ -1,12 +1,10 @@
 extern crate chrono;
+#[cfg(test)]
 extern crate doc_comment;
 extern crate failure;
 extern crate rand;
-#[cfg(feature = "rustfmt")]
-extern crate rustfmt_nightly;
 extern crate serde;
 extern crate serde_json;
-extern crate syn;
 
 use failure::*;
 use graphql_client::Response;
@@ -14,8 +12,18 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::prelude::*;
 
-pub mod generate;
 pub mod queries;
+
+
+pub trait GraphQLQueryCLI
+    where Self: std::marker::Sized+serde::Serialize {
+    /// The top-level shape of the response data (the `data` field in the GraphQL response). In practice this should be generated, since it is hard to write by hand without error.
+    type ResponseData: for<'de> serde::Deserialize<'de>;
+
+    /// Produce a GraphQL query struct that can be JSON serialized and sent to a GraphQL API.
+    /// This query object will be consumed.
+    fn into_query_body(self) -> graphql_client::QueryBody<Self>;
+}
 
 #[doc(hidden)]
 #[derive(Fail, Debug)]
@@ -68,7 +76,6 @@ impl Credentials {
 /// to perform queries or mutations.
 pub struct Braintree {
     pub credentials: Credentials,
-    merchant_url: String,
     user_agent: String,
     pub client: reqwest::Client,
 }
@@ -80,18 +87,6 @@ pub struct BraintreeErrorResult {
     pub message: String,
     pub path: Vec<String>,
     pub error_class: String,
-}
-
-/// All paginated query responses hide the actual content deeply nested in multiple wrapper structs
-/// and enums. This macro unwraps the data.
-#[macro_export]
-macro_rules! unwrap_query {
-    ($var:expr => $variant:path) => {
-        match $var.node.ok_or(err_msg("Node"))?.on {
-            $variant(v) => Ok(v),
-            _ => Err(err_msg("Entry not found!")),
-        }
-    };
 }
 
 /// Return a mutation ID. The Braintree API allows to send a generated, random ID with each mutation
@@ -112,11 +107,6 @@ impl Braintree {
     /// Create a new Braintree instance with credentials and a custom client
     pub fn with_client(credentials: Credentials, client: reqwest::Client) -> Braintree {
         Braintree {
-            merchant_url: format!(
-                "{}/merchants/{}/",
-                credentials.environment.base_url(),
-                credentials.merchant_id
-            ),
             user_agent: format!("Braintree Rust {}", env!("CARGO_PKG_VERSION")),
             credentials,
             client,
@@ -152,9 +142,9 @@ impl Braintree {
     pub fn perform<QUERY>(
         &self,
         variables: QUERY,
-    ) -> std::result::Result<<QUERY as graphql_client::GraphQLQueryCLI>::ResponseData, failure::Error>
+    ) -> std::result::Result<<QUERY as crate::GraphQLQueryCLI>::ResponseData, failure::Error>
     where
-        QUERY: graphql_client::GraphQLQueryCLI,
+        QUERY: crate::GraphQLQueryCLI,
     {
         let response_body: Response<_> =
             serde_json::from_str(&self.perform_graphql_response(variables.into_query_body())?)?;

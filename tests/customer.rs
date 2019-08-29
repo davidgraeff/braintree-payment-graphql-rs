@@ -1,9 +1,5 @@
-#[macro_use(unwrap_query)]
-extern crate braintreepayment_graphql;
-
 use braintreepayment_graphql::{Braintree, mutation_id, Credentials};
 use failure::*;
-use graphql_client::GraphQLQuery;
 
 #[test]
 fn customer_tests() -> Result<(), failure::Error> {

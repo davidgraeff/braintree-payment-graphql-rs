@@ -22,7 +22,7 @@ pub mod ping_test {
     #[allow(dead_code)]
     #[derive(Serialize)]
     pub struct PingTest {}
-    impl graphql_client::GraphQLQueryCLI for PingTest {
+    impl crate::GraphQLQueryCLI for PingTest {
         type ResponseData = ResponseData;
         fn into_query_body(self) -> ::graphql_client::QueryBody<Self> {
             graphql_client::QueryBody {
