@@ -1036,15 +1036,9 @@ pub mod vault_payment {
     #[serde(tag = "__typename")]
     pub enum VaultPaymentVaultPaymentMethodPaymentMethodDetails {
         CreditCardDetails(VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnCreditCardDetails),
-        PayPalAccountDetails(
-            VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnPayPalAccountDetails,
-        ),
-        UsBankAccountDetails(
-            VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnUsBankAccountDetails,
-        ),
-        VenmoAccountDetails(
-            VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnVenmoAccountDetails,
-        ),
+        PayPalAccountDetails(VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnPayPalAccountDetails),
+        UsBankAccountDetails(VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnUsBankAccountDetails),
+        VenmoAccountDetails(VaultPaymentVaultPaymentMethodPaymentMethodDetailsOnVenmoAccountDetails),
         CustomActionsPaymentMethodDetails,
         SamsungPayCardDetails,
     }
@@ -1640,8 +1634,7 @@ pub mod delete_vaulted_payment {
         #[doc = "Delete a multi-use payment method from the vault.\n"]
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(rename = "deletePaymentMethodFromVault")]
-        pub delete_payment_method_from_vault:
-            Option<DeleteVaultedPaymentDeletePaymentMethodFromVault>,
+        pub delete_payment_method_from_vault: Option<DeleteVaultedPaymentDeletePaymentMethodFromVault>,
     }
     #[allow(dead_code)]
     #[derive(Serialize)]
@@ -2040,9 +2033,7 @@ pub mod verify_payment_method {
             match s.as_str() {
                 "BYPASS" => Ok(AvsCvvResponseCode::BYPASS),
                 "DOES_NOT_MATCH" => Ok(AvsCvvResponseCode::DOES_NOT_MATCH),
-                "ISSUER_DOES_NOT_PARTICIPATE" => {
-                    Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE)
-                }
+                "ISSUER_DOES_NOT_PARTICIPATE" => Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE),
                 "MATCHES" => Ok(AvsCvvResponseCode::MATCHES),
                 "NOT_APPLICABLE" => Ok(AvsCvvResponseCode::NOT_APPLICABLE),
                 "NOT_PROVIDED" => Ok(AvsCvvResponseCode::NOT_PROVIDED),
@@ -2334,8 +2325,7 @@ pub mod verify_payment_method {
         #[doc = "Detailed response information from the processor. Will not be present if the\nverification was rejected prior to contacting the processor.\n"]
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(rename = "processorResponse")]
-        pub processor_response:
-            Option<VerifyPaymentMethodVerifyPaymentMethodVerificationProcessorResponse>,
+        pub processor_response: Option<VerifyPaymentMethodVerifyPaymentMethodVerificationProcessorResponse>,
     }
     #[derive(Debug, Deserialize, PartialEq, Serialize)]
     #[doc = "Top-level output field from verifying a payment method.\n"]
@@ -2535,10 +2525,7 @@ pub mod search_transaction {
     }
     impl SearchPaymentMethodSnapshotTypeInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -2615,10 +2602,7 @@ pub mod search_transaction {
     }
     impl SearchTransactionStatusInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -2656,10 +2640,7 @@ pub mod search_transaction {
     }
     impl SearchValueInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -2948,9 +2929,7 @@ pub mod search_transaction {
             match s.as_str() {
                 "BYPASS" => Ok(AvsCvvResponseCode::BYPASS),
                 "DOES_NOT_MATCH" => Ok(AvsCvvResponseCode::DOES_NOT_MATCH),
-                "ISSUER_DOES_NOT_PARTICIPATE" => {
-                    Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE)
-                }
+                "ISSUER_DOES_NOT_PARTICIPATE" => Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE),
                 "MATCHES" => Ok(AvsCvvResponseCode::MATCHES),
                 "NOT_APPLICABLE" => Ok(AvsCvvResponseCode::NOT_APPLICABLE),
                 "NOT_PROVIDED" => Ok(AvsCvvResponseCode::NOT_PROVIDED),
@@ -2978,21 +2957,11 @@ pub mod search_transaction {
         fn serialize<S: serde::Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
             ser.serialize_str(match *self {
                 PaymentMethodSnapshotSearchType::CREDIT_CARD => "CREDIT_CARD",
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY => {
-                    "CREDIT_CARD_VIA_APPLE_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY => {
-                    "CREDIT_CARD_VIA_GOOGLE_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS => {
-                    "CREDIT_CARD_VIA_MASTERPASS"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY => {
-                    "CREDIT_CARD_VIA_SAMSUNG_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT => {
-                    "CREDIT_CARD_VIA_VISA_CHECKOUT"
-                }
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY => "CREDIT_CARD_VIA_APPLE_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY => "CREDIT_CARD_VIA_GOOGLE_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS => "CREDIT_CARD_VIA_MASTERPASS",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY => "CREDIT_CARD_VIA_SAMSUNG_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT => "CREDIT_CARD_VIA_VISA_CHECKOUT",
                 PaymentMethodSnapshotSearchType::PAYPAL => "PAYPAL",
                 PaymentMethodSnapshotSearchType::US_BANK_ACCOUNT => "US_BANK_ACCOUNT",
                 PaymentMethodSnapshotSearchType::VENMO_ACCOUNT => "VENMO_ACCOUNT",
@@ -3005,21 +2974,11 @@ pub mod search_transaction {
             let s = <String>::deserialize(deserializer)?;
             match s.as_str() {
                 "CREDIT_CARD" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD),
-                "CREDIT_CARD_VIA_APPLE_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY)
-                }
-                "CREDIT_CARD_VIA_GOOGLE_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY)
-                }
-                "CREDIT_CARD_VIA_MASTERPASS" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS)
-                }
-                "CREDIT_CARD_VIA_SAMSUNG_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY)
-                }
-                "CREDIT_CARD_VIA_VISA_CHECKOUT" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT)
-                }
+                "CREDIT_CARD_VIA_APPLE_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY),
+                "CREDIT_CARD_VIA_GOOGLE_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY),
+                "CREDIT_CARD_VIA_MASTERPASS" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS),
+                "CREDIT_CARD_VIA_SAMSUNG_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY),
+                "CREDIT_CARD_VIA_VISA_CHECKOUT" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT),
                 "PAYPAL" => Ok(PaymentMethodSnapshotSearchType::PAYPAL),
                 "US_BANK_ACCOUNT" => Ok(PaymentMethodSnapshotSearchType::US_BANK_ACCOUNT),
                 "VENMO_ACCOUNT" => Ok(PaymentMethodSnapshotSearchType::VENMO_ACCOUNT),
@@ -3308,18 +3267,10 @@ pub mod search_transaction {
     #[derive(Debug, Deserialize, PartialEq, Serialize)]
     #[serde(tag = "__typename")]
     pub enum SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetails {
-        CreditCardDetails(
-            SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnCreditCardDetails,
-        ),
-        PayPalAccountDetails(
-            SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnPayPalAccountDetails,
-        ),
-        UsBankAccountDetails(
-            SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnUsBankAccountDetails,
-        ),
-        VenmoAccountDetails(
-            SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnVenmoAccountDetails,
-        ),
+        CreditCardDetails(SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnCreditCardDetails),
+        PayPalAccountDetails(SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnPayPalAccountDetails),
+        UsBankAccountDetails(SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnUsBankAccountDetails),
+        VenmoAccountDetails(SearchTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnVenmoAccountDetails),
         CustomActionsPaymentMethodDetails,
         SamsungPayCardDetails,
     }
@@ -3568,10 +3519,7 @@ pub mod get_transaction {
     }
     impl SearchPaymentMethodSnapshotTypeInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -3648,10 +3596,7 @@ pub mod get_transaction {
     }
     impl SearchTransactionStatusInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -3689,10 +3634,7 @@ pub mod get_transaction {
     }
     impl SearchValueInput {
         pub fn new() -> Self {
-            Self {
-                in_: None,
-                is: None,
-            }
+            Self { in_: None, is: None }
         }
     }
     #[derive(PartialEq, Serialize)]
@@ -3981,9 +3923,7 @@ pub mod get_transaction {
             match s.as_str() {
                 "BYPASS" => Ok(AvsCvvResponseCode::BYPASS),
                 "DOES_NOT_MATCH" => Ok(AvsCvvResponseCode::DOES_NOT_MATCH),
-                "ISSUER_DOES_NOT_PARTICIPATE" => {
-                    Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE)
-                }
+                "ISSUER_DOES_NOT_PARTICIPATE" => Ok(AvsCvvResponseCode::ISSUER_DOES_NOT_PARTICIPATE),
                 "MATCHES" => Ok(AvsCvvResponseCode::MATCHES),
                 "NOT_APPLICABLE" => Ok(AvsCvvResponseCode::NOT_APPLICABLE),
                 "NOT_PROVIDED" => Ok(AvsCvvResponseCode::NOT_PROVIDED),
@@ -4011,21 +3951,11 @@ pub mod get_transaction {
         fn serialize<S: serde::Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
             ser.serialize_str(match *self {
                 PaymentMethodSnapshotSearchType::CREDIT_CARD => "CREDIT_CARD",
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY => {
-                    "CREDIT_CARD_VIA_APPLE_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY => {
-                    "CREDIT_CARD_VIA_GOOGLE_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS => {
-                    "CREDIT_CARD_VIA_MASTERPASS"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY => {
-                    "CREDIT_CARD_VIA_SAMSUNG_PAY"
-                }
-                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT => {
-                    "CREDIT_CARD_VIA_VISA_CHECKOUT"
-                }
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY => "CREDIT_CARD_VIA_APPLE_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY => "CREDIT_CARD_VIA_GOOGLE_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS => "CREDIT_CARD_VIA_MASTERPASS",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY => "CREDIT_CARD_VIA_SAMSUNG_PAY",
+                PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT => "CREDIT_CARD_VIA_VISA_CHECKOUT",
                 PaymentMethodSnapshotSearchType::PAYPAL => "PAYPAL",
                 PaymentMethodSnapshotSearchType::US_BANK_ACCOUNT => "US_BANK_ACCOUNT",
                 PaymentMethodSnapshotSearchType::VENMO_ACCOUNT => "VENMO_ACCOUNT",
@@ -4038,21 +3968,11 @@ pub mod get_transaction {
             let s = <String>::deserialize(deserializer)?;
             match s.as_str() {
                 "CREDIT_CARD" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD),
-                "CREDIT_CARD_VIA_APPLE_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY)
-                }
-                "CREDIT_CARD_VIA_GOOGLE_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY)
-                }
-                "CREDIT_CARD_VIA_MASTERPASS" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS)
-                }
-                "CREDIT_CARD_VIA_SAMSUNG_PAY" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY)
-                }
-                "CREDIT_CARD_VIA_VISA_CHECKOUT" => {
-                    Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT)
-                }
+                "CREDIT_CARD_VIA_APPLE_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_APPLE_PAY),
+                "CREDIT_CARD_VIA_GOOGLE_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_GOOGLE_PAY),
+                "CREDIT_CARD_VIA_MASTERPASS" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_MASTERPASS),
+                "CREDIT_CARD_VIA_SAMSUNG_PAY" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_SAMSUNG_PAY),
+                "CREDIT_CARD_VIA_VISA_CHECKOUT" => Ok(PaymentMethodSnapshotSearchType::CREDIT_CARD_VIA_VISA_CHECKOUT),
                 "PAYPAL" => Ok(PaymentMethodSnapshotSearchType::PAYPAL),
                 "US_BANK_ACCOUNT" => Ok(PaymentMethodSnapshotSearchType::US_BANK_ACCOUNT),
                 "VENMO_ACCOUNT" => Ok(PaymentMethodSnapshotSearchType::VENMO_ACCOUNT),
@@ -4341,18 +4261,10 @@ pub mod get_transaction {
     #[derive(Debug, Deserialize, PartialEq, Serialize)]
     #[serde(tag = "__typename")]
     pub enum GetTransactionSearchTransactionsEdgesNodePaymentMethodDetails {
-        CreditCardDetails(
-            GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnCreditCardDetails,
-        ),
-        PayPalAccountDetails(
-            GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnPayPalAccountDetails,
-        ),
-        UsBankAccountDetails(
-            GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnUsBankAccountDetails,
-        ),
-        VenmoAccountDetails(
-            GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnVenmoAccountDetails,
-        ),
+        CreditCardDetails(GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnCreditCardDetails),
+        PayPalAccountDetails(GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnPayPalAccountDetails),
+        UsBankAccountDetails(GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnUsBankAccountDetails),
+        VenmoAccountDetails(GetTransactionSearchTransactionsEdgesNodePaymentMethodDetailsOnVenmoAccountDetails),
         CustomActionsPaymentMethodDetails,
         SamsungPayCardDetails,
     }

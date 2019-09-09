@@ -1,4 +1,4 @@
-use braintreepayment_graphql::{Braintree, mutation_id, Credentials};
+use braintreepayment_graphql::{mutation_id, Braintree, Credentials};
 use failure::*;
 
 #[test]
@@ -56,12 +56,9 @@ fn update_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Err
 fn query_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Error> {
     use braintreepayment_graphql::queries::{customer::get_customer::*, customer_helpers::unwrap_customer};
 
-    let customer = bt
-        .perform(
-            GetCustomer {
-                cust_id: customer_id.to_owned(),
-            },
-        )?;
+    let customer = bt.perform(GetCustomer {
+        cust_id: customer_id.to_owned(),
+    })?;
 
     let customer = unwrap_customer(customer).ok_or(err_msg("No customer found with the given ID"))?;
 

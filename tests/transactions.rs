@@ -1,4 +1,4 @@
-use braintreepayment_graphql::{braintree_error, Braintree, Credentials, mutation_id, queries::transaction_helpers::*};
+use braintreepayment_graphql::{braintree_error, mutation_id, queries::transaction_helpers::*, Braintree, Credentials};
 use failure::*;
 
 #[test]
@@ -71,13 +71,31 @@ fn transactions() -> Result<(), failure::Error> {
 
     // Charge payment tests
     payment(&bt, pm_paypal, amount_settled, false, Some("pm_paypal".to_owned()))?;
-    payment(&bt, pm_paypay_onetime, amount_settled, false, Some("pm_paypay_onetime".to_owned()))?;
-    payment(&bt, pm_creditcard, amount_settled, false, Some("pm_creditcard".to_owned()))?;
+    payment(
+        &bt,
+        pm_paypay_onetime,
+        amount_settled,
+        false,
+        Some("pm_paypay_onetime".to_owned()),
+    )?;
+    payment(
+        &bt,
+        pm_creditcard,
+        amount_settled,
+        false,
+        Some("pm_creditcard".to_owned()),
+    )?;
     payment(&bt, pm_local, amount_settled, false, Some("pm_local".to_owned()))?;
     //payment(&bt, pm_android, amount_settled, false)?;
 
     let unique_order_id = mutation_id();
-    let created_transaction = payment(&bt, pm_creditcard_no_billing_addr, amount_settled, false, Some(unique_order_id.clone()))?;
+    let created_transaction = payment(
+        &bt,
+        pm_creditcard_no_billing_addr,
+        amount_settled,
+        false,
+        Some(unique_order_id.clone()),
+    )?;
 
     assert_eq!(created_transaction.order_id, Some(unique_order_id));
 
@@ -85,30 +103,54 @@ fn transactions() -> Result<(), failure::Error> {
     assert_eq!(r.unwrap().amount.unwrap().value.unwrap(), amount_settled);
 
     let r = search_transaction(&bt, &created_transaction.order_id.unwrap())?;
-    assert!(r.len()>=1);
-    assert_eq!(r.get(0).unwrap().amount.as_ref().unwrap().value.unwrap(), amount_settled);
+    assert!(r.len() >= 1);
+    assert_eq!(
+        r.get(0).unwrap().amount.as_ref().unwrap().value.unwrap(),
+        amount_settled
+    );
 
     // Erroneous charging: Declined
-    let r = payment(&bt, pm_local, amount_declined, false,Some("pm_local_amount_declined".to_owned()))?;
+    let r = payment(
+        &bt,
+        pm_local,
+        amount_declined,
+        false,
+        Some("pm_local_amount_declined".to_owned()),
+    )?;
 
     use braintreepayment_graphql::queries::transactions::get_transaction::TransactionStatus;
     let r = get_transaction(&bt, &r.id)?;
     assert_eq!(r.unwrap().status.unwrap(), TransactionStatus::AUTHORIZING);
 
     // Erroneous charging: Declined
-    let r = payment(&bt, pm_creditcard_processor_declined, amount_settled, false,Some("pm_creditcard_processor_declined".to_owned()))?;
+    let r = payment(
+        &bt,
+        pm_creditcard_processor_declined,
+        amount_settled,
+        false,
+        Some("pm_creditcard_processor_declined".to_owned()),
+    )?;
     let r = get_transaction(&bt, &r.id)?;
     assert_eq!(r.unwrap().status.unwrap(), TransactionStatus::SUBMITTED_FOR_SETTLEMENT);
 
-
     // Erroneous charging: Payment method already used
-    let error = payment(&bt, pm_method_id_already_used, amount_settled, false,Some("demo_id".to_owned())).expect_err("");
+    let error = payment(
+        &bt,
+        pm_method_id_already_used,
+        amount_settled,
+        false,
+        Some("demo_id".to_owned()),
+    )
+    .expect_err("");
     let error = braintree_error(Some(&error)).ok_or(err_msg(err_msg("Expected pm_method_id_already_used")))?;
-    assert_eq!(error.path,vec!["chargePaymentMethod", "input", "transaction", "paymentMethodNonce"]);
+    assert_eq!(
+        error.path,
+        vec!["chargePaymentMethod", "input", "transaction", "paymentMethodNonce"]
+    );
     assert_eq!(error.error_class, "VALIDATION".to_owned());
 
     // Vault payment method test
-    let vaulted_transaction= vault(&bt, pm_creditcard)?;
+    let vaulted_transaction = vault(&bt, pm_creditcard)?;
 
     // The sandbox environment does not support verification
     let r = verify(&bt, &vaulted_transaction.id)?;
@@ -119,16 +161,28 @@ fn transactions() -> Result<(), failure::Error> {
 
     delete_transaction(&bt, &vaulted_transaction.id)?;
 
-    let vaulted_transaction=vault(&bt, pm_paypal)?;
-    payment(&bt, &vaulted_transaction.id, amount_settled, true,Some("recurring".to_owned()))?;
-    payment(&bt, &vaulted_transaction.id, amount_settled, true,Some("recurring".to_owned()))?;
+    let vaulted_transaction = vault(&bt, pm_paypal)?;
+    payment(
+        &bt,
+        &vaulted_transaction.id,
+        amount_settled,
+        true,
+        Some("recurring".to_owned()),
+    )?;
+    payment(
+        &bt,
+        &vaulted_transaction.id,
+        amount_settled,
+        true,
+        Some("recurring".to_owned()),
+    )?;
     delete_transaction(&bt, &vaulted_transaction.id)?;
 
     // Erroneous vaulting
     let error = vault(&bt, pm_paypay_onetime).expect_err("");
     let error = braintree_error(Some(&error)).ok_or(err_msg("Expected vaulting error"))?;
     assert_eq!(error.error_class, "VALIDATION".to_owned());
-    assert_eq!(error.path,vec!["vaultPaymentMethod", "input", "paymentMethodId"]);
+    assert_eq!(error.path, vec!["vaultPaymentMethod", "input", "paymentMethodId"]);
 
     Ok(())
 }

@@ -1,10 +1,14 @@
 [package]
 name = "braintreepayment_graphql"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["David Gräff <david.graeff@web.de>"]
 edition = "2018"
 license = "MIT"
 description = "This crate allows easy access to the [Braintree](https://www.braintreepayments.com) API via the GraphQL interface."
+readme = "readme.md"
+keywords = ["braintree", "payment", "paypal"]
+categories = ["api-bindings"]
+repository = "https://github.com/davidgraeff/braintree-payment-graphql-rs"
 
 [workspace]
 
@@ -27,3 +31,13 @@ rand = "0.7.0"
 
 [dev-dependencies]
 doc-comment = "0.3.1"
+
+[features]
+default = ["default-tls"]
+rustls-tls = ["reqwest/rustls-tls"]
+default-tls = ["reqwest/default-tls"]
+external_doc = []
+
+# Render the readme file on doc.rs
+[package.metadata.docs.rs]
+features = [ "external_doc", "rocket_support" ]

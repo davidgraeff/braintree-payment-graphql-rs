@@ -1,10 +1,6 @@
-extern crate chrono;
-#[cfg(test)]
-extern crate doc_comment;
-extern crate failure;
-extern crate rand;
-extern crate serde;
-extern crate serde_json;
+#![deny(warnings)]
+#![cfg_attr(feature = "external_doc", feature(external_doc))]
+#![cfg_attr(feature = "external_doc", doc(include = "../readme.md"))]
 
 use failure::*;
 use graphql_client::Response;
@@ -14,10 +10,12 @@ use std::io::prelude::*;
 
 pub mod queries;
 
-
 pub trait GraphQLQueryCLI
-    where Self: std::marker::Sized+serde::Serialize {
-    /// The top-level shape of the response data (the `data` field in the GraphQL response). In practice this should be generated, since it is hard to write by hand without error.
+    where
+        Self: std::marker::Sized + serde::Serialize,
+{
+    /// The top-level shape of the response data (the `data` field in the GraphQL response).
+    /// In practice this should be generated, since it is hard to write by hand without error.
     type ResponseData: for<'de> serde::Deserialize<'de>;
 
     /// Produce a GraphQL query struct that can be JSON serialized and sent to a GraphQL API.
@@ -33,7 +31,6 @@ pub struct BraintreeError {
 }
 
 /// The Braintree API can operate in a sandboxed environment.
-/// Set the environment via the [Credentials].
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub enum Environment {
     Sandbox,
@@ -53,15 +50,20 @@ impl Environment {
 /// Your Braintree access including your merchant ID, your public and private key.
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub struct Credentials {
-    environment: Environment,
+    /// The Braintree API can operate in a sandboxed environment.
+    pub environment: Environment,
+    /// The merchant ID is not yet used
     #[allow(dead_code)]
-    merchant_id: String,
-    public_key: String,
-    private_key: String,
+    pub merchant_id: String,
+    /// The public key. Get this from the Braintree website
+    pub public_key: String,
+    /// The private key. Get this from the Braintree website
+    pub private_key: String,
 }
 
 #[doc(hidden)]
 impl Credentials {
+    /// Convenience method to create a Credentials object by a credentials file.
     pub fn from_file(credential_file: &str) -> Result<Credentials, failure::Error> {
         let mut f = File::open(credential_file)?;
         let mut buffer = Vec::new();
@@ -80,7 +82,7 @@ pub struct Braintree {
     pub client: reqwest::Client,
 }
 
-/// Use the [braintree_error] method on a failed [Braintree::perform] call and get this struct back
+/// Use the [`braintree_error`] method on a failed [`Braintree::perform`] call and get this struct back
 /// with an English error message, a deterministic path based on the GraphQL schema and an error class.
 #[derive(Debug)]
 pub struct BraintreeErrorResult {
@@ -105,6 +107,22 @@ impl Braintree {
     }
 
     /// Create a new Braintree instance with credentials and a custom client
+///    ```rust
+///    use std::error::Error;
+///    use braintreepayment_graphql::{Braintree, Credentials};
+///
+///    fn main() -> Result<(), Box<dyn Error>> {
+///        use std::time::Duration;
+///
+///        let client = reqwest::Client::builder()
+///            .gzip(true)
+///            .timeout(Duration::from_secs(10))
+///            .build()?;
+///
+///        let bt = Braintree::with_client(Credentials::from_file("credentials.json")?, client);
+///        Ok(())
+///    }
+///    ```
     pub fn with_client(credentials: Credentials, client: reqwest::Client) -> Braintree {
         Braintree {
             user_agent: format!("Braintree Rust {}", env!("CARGO_PKG_VERSION")),
@@ -113,7 +131,7 @@ impl Braintree {
         }
     }
 
-    /// You usually do not want to call this directly, but [perform] instead.
+    /// You usually do not want to call this directly, but [`Braintree::perform`] instead.
     ///
     /// This method will synchronously send the given query to Braintree and receives the response.
     /// It returns the plain text response non-deserialized.
@@ -121,8 +139,8 @@ impl Braintree {
         &self,
         query: graphql_client::QueryBody<QBody>,
     ) -> Result<String, failure::Error>
-    where
-        QBody: serde::ser::Serialize,
+        where
+            QBody: serde::ser::Serialize,
     {
         use reqwest::header::USER_AGENT;
 
@@ -143,14 +161,14 @@ impl Braintree {
         &self,
         variables: QUERY,
     ) -> std::result::Result<<QUERY as crate::GraphQLQueryCLI>::ResponseData, failure::Error>
-    where
-        QUERY: crate::GraphQLQueryCLI,
+        where
+            QUERY: crate::GraphQLQueryCLI,
     {
         let response_body: Response<_> =
             serde_json::from_str(&self.perform_graphql_response(variables.into_query_body())?)?;
         if let Some(errors) = &response_body.errors {
             #[cfg(test)]
-            print_errors_if_any(errors);
+                print_errors_if_any(errors);
             if errors.len() > 0 {
                 return Err(BraintreeError { errors: errors.clone() }.into());
             }

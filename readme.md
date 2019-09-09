@@ -2,8 +2,8 @@
 
 <img align="right" src="./doc/logo.png" />
 
-[![Build Status](https://travis-ci.org/davidgraeff/braintree-payment-graphql.svg)](https://travis-ci.org/davidgraeff/braintree-payment-graphql)
-[![](https://meritbadge.herokuapp.com/braintree-payment-graphql)](https://crates.io/crates/braintree-payment-graphql)
+[![Build Status](https://github.com/davidgraeff/braintree-payment-graphql-rs/workflows/Integration/badge.svg)](https://github.com/davidgraeff/braintree-payment-graphql-rs/actions)
+[![](https://meritbadge.herokuapp.com/braintree-payment-graphql-rs)](https://crates.io/crates/braintree-payment-graphql-rs)
 [![](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 For those unfamiliar with Braintree or payments processing, [Braintree](https://www.braintreepayments.com)'s homepage is a good place to start to learn more, along with the developer documentation which provides a good overview of the available tools and API's.
@@ -12,12 +12,12 @@ This crate allows easy access to Braintree via the GraphQL interface.
 It offers predefined, common queries and manages connection details.
 
 The advantage of GraphQL is the ability to write custom, specific queries
-with only those input fields that you need and only your indiviual selection of response fields.
+with only those input fields that you need and your individual selection of response fields.
 
 1. Design and test your queries in the [Braintree API Explorer](https://graphql.braintreepayments.com/explorer/).
-2. Create queries in your crates `queries` directory, for instance `queries/some_filename.graphql`.
+2. Store those graphql queries in your crates `queries` directory, for instance `queries/some_filename.graphql`.
 3. Run the "braintree-queries" tool via `cargo run --bin braintree-queries` in that directory.
-   The tool generates rust structs and methods to perform your queries, in a type safe manner.
+   The tool generates rust structs and methods to perform your queries in a type safe manner.
    Have a look at the `examples/` directory.
 
 ## How to get started
@@ -28,57 +28,37 @@ Once you've created an account, follow the instructions to retrieve your Merchan
 store them in a `credentials.json` file. Use `credentials.json.example` as a template.
 **Never commit this file!** You should add it to your `.gitignore` file now.
 
-In your rust program, initialize the `Braintree` object first.
-For example by using a credentials file.
+In your rust program, initialize the `Braintree` object via those credentials.
 
 ```rust
-extern crate braintreepayment_graphql;
 use std::error::Error;
 
 use braintreepayment_graphql::{Braintree, Credentials};
+use serde_json::from_str;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let bt = Braintree::new(Credentials::from_file("credentials.json")?);
+    // OR: Avoid the IO access on start and embed the file
+    let bt = Braintree::new(from_str(include_str!("credentials.json"))?);
 }
 ```
-
-### Adapt the HTTP client
 
 You might want to adapt the http clients configuration ( [reqwest](https://docs.rs/reqwest) )
-to your needs:
+to your needs via the [`Braintree::with_client`] constructor.
 
-```rust
-extern crate braintreepayment_graphql;
-extern crate reqwest;
-
-use std::error::Error;
-use braintreepayment_graphql::{Braintree, Credentials};
-
-fn main() -> Result<(), Box<dyn Error>> {
-    use std::time::Duration;
-
-    let client = reqwest::Client::builder()
-        .gzip(true)
-        .timeout(Duration::from_secs(10))
-        .build()?;
-
-    let bt = Braintree::with_client(Credentials::from_file("credentials.json")?, client);
-}
-```
-
-### Predefined module organisation
+### Module organisation
 
 With the `bt` object you perform GraphQL queries (comparable to HTTP GET)
 and mutations (similar to POST, PUT).
 
-The `bt.perform(query)` method aims to hide GraphQL details away though.
+The `bt.perform(query)` method aims to hide GraphQL details away.
 The `query` argument refers to a *Query* name. For example "CreateCustomer".
 
 This crate comes with predefined queries / mutations for customer management
 and one-time / recurring transactions. Find the GraphQL files in `queries/` and
 get an overview of available queries, parameters and return types.
 
-The queries are organised in a hierarchial module layout, starting with `queries`.
+The queries are organised in a hierarchical module layout, starting with `queries`.
 Customer related queries live in the submodule `customer`, transactions in the
 submodule `transactions`.
 
@@ -92,7 +72,7 @@ For example to bring `CreateCustomer` into scope, you would do the following
 use braintreepayment_graphql::queries::customer::create_customer::*;
 ```
 
-### Create, Update, Delete Customers as well as create client Tokens
+### Create, Update, Delete Customers as well as create client tokens
 
 All customer related operations are shown below with an example each.
 
@@ -125,9 +105,9 @@ fn create_customer(bt: &Braintree) -> Result<String, failure::Error> {
 ```
 
 The `bt.perform` method performs a synchronous network operation and returns with a `Result`.
-Network failures as well as GraphQL query problems, invalid requests but also legitim errors
+Network failures, invalid and bad requests but also legit errors (like "Gateway denied")
 result in a returned Error.
-Proper error handling is shown further down on an invalid charge_payment request.
+Proper error handling is shown further down on an invalid `charge_payment` request.
 
 ```rust
 fn update_customer(bt: &Braintree, customer_id: &str) -> Result<(), failure::Error> {
@@ -391,26 +371,12 @@ fn payment_charge_fail() -> Result<(), failure::Error> {
 }
 ```
 
-## Testing
-
-This crate contains full integration tests, including creating a customer, enumerate customers, delete customers,
-create transactions, check transactions, charge payments, vault payments.
-A valid "credentials.json" file with the "Sandbox" environment must be present.
-
-Start test runs with `cargo test` as usual.
-
 ## Disclaimer and Limitations
 
 Note that this is an unofficial library, provided as-is, with no support whatsoever by Braintree.
-
 The generator tool uses a modified branch of the graphql-client crate until 0.9 is released.
 
 MIT licensed. Pull requests are welcome.
-
-## For maintainers
-
-Update the Braintree schema file with `cd braintree-queries-generator && ./update_schema.sh`.
-Run `cargo run -p braintree-queries-generator` in this directory to update the generated query/mutation files.
 
 Cheers,
 David Graeff

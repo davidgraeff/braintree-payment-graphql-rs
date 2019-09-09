@@ -1,0 +1,33 @@
+name: Integration
+
+on:
+  pull_request:
+  push:
+    paths:
+      - 'src/*'
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        rust: [stable]
+
+    steps:
+    - uses: hecrj/setup-rust-action@master
+      with:
+        rust-version: ${{ matrix.rust }}
+    - uses: actions/checkout@master
+    - name: Extract Test Credentials
+      if: matrix.os != 'windows-latest'
+      env:
+        SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+      run: ./tests/extract_test_credentials.sh
+    - name: Build And Test
+      if: matrix.os != 'windows-latest'
+      run: cargo test
+    - name: Build on Windows
+      if: matrix.os == 'windows-latest'
+      run: cargo build

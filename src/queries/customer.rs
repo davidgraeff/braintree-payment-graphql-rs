@@ -469,9 +469,7 @@ pub mod get_customer {
     #[derive(Debug, Deserialize, PartialEq, Serialize)]
     #[serde(tag = "__typename")]
     pub enum GetCustomerNodeOnCustomerPaymentMethodsEdgesNodeDetails {
-        PayPalAccountDetails(
-            GetCustomerNodeOnCustomerPaymentMethodsEdgesNodeDetailsOnPayPalAccountDetails,
-        ),
+        PayPalAccountDetails(GetCustomerNodeOnCustomerPaymentMethodsEdgesNodeDetailsOnPayPalAccountDetails),
         CreditCardDetails,
         CustomActionsPaymentMethodDetails,
         SamsungPayCardDetails,

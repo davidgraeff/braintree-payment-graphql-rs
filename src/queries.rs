@@ -1,6 +1,9 @@
+//! # Enumerations for Braintree like currencies, country codes
+
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
+/// Currency codes for Braintree Queries and Mutations
 #[rustfmt::skip]
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum CurrencyCodeAlpha {
@@ -141,6 +144,7 @@ pub enum CurrencyCodeAlpha {
     ZWD,
 }
 
+/// Country codes for Braintree Queries and Mutations
 #[rustfmt::skip]
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum CountryCodeAlpha3 {
@@ -403,23 +407,25 @@ pub mod common;
 pub mod customer;
 pub mod transactions;
 
+/// Because of the nature of GraphQL and no way to transform responses,
+/// some API responses are very nested and wrapped.
+/// Some helper methods in this module extract the actual data out of those
+/// responses.
 pub mod customer_helpers {
     use crate::queries::customer::get_customer::*;
 
-    pub fn unwrap_customer(r:ResponseData) -> Option<GetCustomerNodeOnCustomer> {
-        r.node.and_then(|f|
-            match f.on {
-                GetCustomerNodeOn::Customer(c) => Some(c),
-                _ => None
-            }
-        )
+    pub fn unwrap_customer(r: ResponseData) -> Option<GetCustomerNodeOnCustomer> {
+        r.node.and_then(|f| match f.on {
+            GetCustomerNodeOn::Customer(c) => Some(c),
+            _ => None,
+        })
     }
 }
 
 pub mod transaction_helpers {
-    use failure::*;
-    use crate::Braintree;
     use crate::queries::transactions::*;
+    use crate::Braintree;
+    use failure::*;
 
     use charge_payment_method::ChargePaymentMethodChargePaymentMethodTransaction;
     use get_transaction::GetTransactionSearchTransactionsEdgesNode;
@@ -482,9 +488,11 @@ pub mod transaction_helpers {
         TooManyResults,
     }
 
-
-    pub fn unwrap_get_result(r: crate::queries::transactions::get_transaction::ResponseData) -> Result<Option<GetTransactionSearchTransactionsEdgesNode>, failure::Error> {
-        let mut r = r.search
+    pub fn unwrap_get_result(
+        r: crate::queries::transactions::get_transaction::ResponseData,
+    ) -> Result<Option<GetTransactionSearchTransactionsEdgesNode>, failure::Error> {
+        let mut r = r
+            .search
             .and_then(|f| f.transactions)
             .and_then(|f| f.edges)
             .ok_or(err_msg("Expected a paginated search result"))?;
@@ -496,9 +504,7 @@ pub mod transaction_helpers {
             1 => {
                 return Ok(r.pop().and_then(|f| f.and_then(|f| f.node)));
             }
-            _ => {
-                Err(BrainTreeErrorKind::TooManyResults)?
-            }
+            _ => Err(BrainTreeErrorKind::TooManyResults)?,
         }
     }
 
@@ -508,16 +514,18 @@ pub mod transaction_helpers {
     ) -> Result<Option<GetTransactionSearchTransactionsEdgesNode>, failure::Error> {
         use crate::queries::transactions::get_transaction::*;
 
-        let r = bt
-            .perform(GetTransaction {
-                transaction_id: transaction_id.to_owned(),
-            })?;
+        let r = bt.perform(GetTransaction {
+            transaction_id: transaction_id.to_owned(),
+        })?;
 
         Ok(unwrap_get_result(r)?)
     }
 
-    pub fn unwrap_search_result(r: crate::queries::transactions::search_transaction::ResponseData) -> Result<Vec<SearchTransactionSearchTransactionsEdgesNode>, failure::Error> {
-        let r = r.search
+    pub fn unwrap_search_result(
+        r: crate::queries::transactions::search_transaction::ResponseData,
+    ) -> Result<Vec<SearchTransactionSearchTransactionsEdgesNode>, failure::Error> {
+        let r = r
+            .search
             .and_then(|f| f.transactions)
             .and_then(|f| f.edges)
             .ok_or(err_msg("Expected a paginated search result"))?;
@@ -541,16 +549,15 @@ pub mod transaction_helpers {
     ) -> Result<Vec<SearchTransactionSearchTransactionsEdgesNode>, failure::Error> {
         use crate::queries::transactions::search_transaction::*;
 
-        let r = bt
-            .perform(SearchTransaction {
-                input: TransactionSearchInput {
-                    order_id: Some(SearchTextInput {
-                        is: Some(order_id.to_owned()),
-                        ..SearchTextInput::new()
-                    }),
-                    ..TransactionSearchInput::new()
-                },
-            })?;
+        let r = bt.perform(SearchTransaction {
+            input: TransactionSearchInput {
+                order_id: Some(SearchTextInput {
+                    is: Some(order_id.to_owned()),
+                    ..SearchTextInput::new()
+                }),
+                ..TransactionSearchInput::new()
+            },
+        })?;
 
         unwrap_search_result(r)
     }
@@ -569,16 +576,18 @@ pub mod transaction_helpers {
             false => None,
         };
 
-        let response = bt.perform(ChargePaymentMethod {
-            payment_method_id: payment_method_id.to_owned(),
-            transaction: TransactionInput {
-                order_id,
-                purchase_order_number: Some("demo_id".to_owned()),
-                recurring,
-                ..TransactionInput::new(amount)
-            },
-            client_mutation_id: None,
-        })?.charge_payment_method
+        let response = bt
+            .perform(ChargePaymentMethod {
+                payment_method_id: payment_method_id.to_owned(),
+                transaction: TransactionInput {
+                    order_id,
+                    purchase_order_number: Some("demo_id".to_owned()),
+                    recurring,
+                    ..TransactionInput::new(amount)
+                },
+                client_mutation_id: None,
+            })?
+            .charge_payment_method
             .and_then(|f| f.transaction)
             .ok_or(err_msg("Expected a payment result"))?;
 
