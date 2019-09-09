@@ -1,7 +1,13 @@
 use braintreepayment_graphql::{Braintree, Credentials};
 use failure::*;
 
-doc_comment::doctest!("../readme.md");
+pub(crate) fn print_errors_if_any(errors: &Vec<graphql_client::Error>) {
+    println!("there are errors:");
+
+    for error in errors {
+        println!("{:?}", error);
+    }
+}
 
 #[test]
 fn ping_api() -> Result<(), failure::Error> {
