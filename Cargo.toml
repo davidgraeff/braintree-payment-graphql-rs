@@ -1,6 +1,6 @@
 [package]
 name = "braintreepayment_graphql"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["David Gräff <david.graeff@web.de>"]
 edition = "2018"
 license = "MIT"
@@ -17,26 +17,27 @@ members = [
 ]
 
 [dependencies]
-url  = "2.1.0"
-reqwest = "0.9.20"
-chrono = { version = "0.4.7", features = ["serde"] }
-graphql_client = "0.8.0"
+reqwest = { version ="^0.9", default-features = false }
+chrono = { version = "^0.4", features = ["serde"] }
+graphql_client = "^0.8"
 
-failure = "0.1.5"
+failure = "^0.1"
 serde_json = "^1.0"
 serde = "^1.0"
-rust_decimal = "1.0.3"
-rust_decimal_macros = "1.0.3"
-rand = "0.7.0"
+rust_decimal = "^1.0"
+rust_decimal_macros = "^1.0"
+
+rand =  { version = "^0.7", optional = true }
 
 [dev-dependencies]
-doc-comment = "0.3.1"
+doc-comment = "^0.3"
 
 [features]
-default = ["default-tls"]
+default = ["default-tls", "mutation_id"]
 rustls-tls = ["reqwest/rustls-tls"]
 default-tls = ["reqwest/default-tls"]
 external_doc = []
+mutation_id = ["rand"]
 
 # Render the readme file on doc.rs
 [package.metadata.docs.rs]

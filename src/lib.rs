@@ -93,6 +93,7 @@ pub struct BraintreeErrorResult {
 
 /// Return a mutation ID. The Braintree API allows to send a generated, random ID with each mutation
 /// which will be part of the response. This allows to match a specific mutation with a response.
+#[cfg(feature = "mutation_id")]
 pub fn mutation_id() -> String {
     use rand::distributions::Alphanumeric;
     use rand::{thread_rng, Rng};

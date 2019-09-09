@@ -3,3 +3,4 @@
 .idea
 
 credentials.json
+Cargo.lock
