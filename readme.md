@@ -3,7 +3,7 @@
 <img align="right" src="./doc/logo.png" />
 
 [![Build Status](https://github.com/davidgraeff/braintree-payment-graphql-rs/workflows/Integration/badge.svg)](https://github.com/davidgraeff/braintree-payment-graphql-rs/actions)
-[![](https://meritbadge.herokuapp.com/braintree-payment-graphql-rs)](https://crates.io/crates/braintree-payment-graphql-rs)
+[![](https://meritbadge.herokuapp.com/braintreepayment_graphql)](https://crates.io/crates/braintreepayment_graphql)
 [![](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 For those unfamiliar with Braintree or payments processing, [Braintree](https://www.braintreepayments.com)'s homepage is a good place to start to learn more, along with the developer documentation which provides a good overview of the available tools and API's.
@@ -19,6 +19,12 @@ with only those input fields that you need and your individual selection of resp
 3. Run the "braintree-queries" tool via `cargo run --bin braintree-queries` in that directory.
    The tool generates rust structs and methods to perform your queries in a type safe manner.
    Have a look at the `examples/` directory.
+
+## Cargo features
+
+* rustls-tls: Use rustls instead of native-tls (openssl on Linux).
+  If you want to compile this crate with [MUSL](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html),
+  this is what you want. Don't forget to disable the default features with --no-default-features.
 
 ## How to get started
 
